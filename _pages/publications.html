@@ -5,38 +5,65 @@ permalink: /publications/
 author_profile: true
 ---
 
-<div class="wordwrap">
-  You can also find my articles on 
-  <a href="https://orcid.org/0000-0002-9004-6218" target="_blank">my ORCID profile</a>.
+<h1>Publications</h1>
+
+<p>My latest publications are available below. For a complete list, visit my 
+   <a href="https://orcid.org/0000-0002-9004-6218" target="_blank">ORCID profile</a>.
+</p>
+
+<div id="orcid-publications">
+    <p>Loading publications...</p>
 </div>
 
-{% include base_path %}
+<script>
+  async function fetchORCIDPublications() {
+    const orcidId = "0000-0002-9004-6218";
+    const url = `https://pub.orcid.org/v3.0/${orcidId}/works`;
+    
+    try {
+      const response = await fetch(url, { headers: { Accept: "application/json" }});
+      const data = await response.json();
+      const works = data.group;
+      
+      let publicationsHTML = "<ul style='list-style-type: none; padding: 0;'>";
+      works.forEach(work => {
+        const title = work['work-summary'][0].title.title.value;
+        const year = work['work-summary'][0]['publication-date']?.year?.value || "N/A";
+        const link = work['work-summary'][0]['external-ids']['external-id'][0]?.url?.value || "#";
+        publicationsHTML += `<li style="margin-bottom: 15px;">
+                              <strong>${title}</strong> (${year})  
+                              <br><a href="${link}" target="_blank" style="color: #007bff; text-decoration: none;">Read more</a>
+                             </li>`;
+      });
+      publicationsHTML += "</ul>";
 
-<!-- New style rendering if publication categories are defined -->
-{% if site.publication_category %}
-  {% for category in site.publication_category %}
-    {% assign title_shown = false %}
-    {% for post in site.publications reversed %}
-      {% if post.category != category[0] %}
-        {% continue %}
-      {% endif %}
-      {% unless title_shown %}
-        <h2>{{ category[1].title }}</h2><hr />
-        {% assign title_shown = true %}
-      {% endunless %}
-      {% include archive-single.html %}
-    {% endfor %}
-  {% endfor %}
-{% else %}
-  {% for post in site.publications reversed %}
-    {% include archive-single.html %}
-  {% endfor %}
-{% endif %}
+      document.getElementById("orcid-publications").innerHTML = publicationsHTML;
 
-<!-- ORCID embedded section -->
-<div style="text-align: center; margin-top: 30px;">
-    <iframe src="https://orcid.org/0000-0002-9004-6218" 
-            width="100%" height="600px" 
-            style="border:none; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1);">
-    </iframe>
-</div>
+    } catch (error) {
+      document.getElementById("orcid-publications").innerHTML = "<p>Error fetching publications. Please try again later.</p>";
+      console.error("Error fetching ORCID data:", error);
+    }
+  }
+
+  fetchORCIDPublications();
+</script>
+
+<style>
+  #orcid-publications {
+      font-family: 'Arial', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+
+  h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: #2c3e50;
+  }
+</style>
